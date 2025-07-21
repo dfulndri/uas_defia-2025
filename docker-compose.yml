@@ -1,0 +1,37 @@
+services:
+  php:
+    build:
+      context: ./php
+    container_name: uas_defia_php
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      - PROJECT_NAME=uas_defia
+    depends_on:
+      - db
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: uas_defia_nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - php
+
+  db:
+    image: mariadb:10.11
+    container_name: uas_defia_db
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_DATABASE: uas_defia
+      MYSQL_ROOT_PASSWORD: p455w0rd
+    volumes:
+      - ./db/conf.d:/etc/mysql/conf.d
+      - ./db/data:/var/lib/mysql
